@@ -5,7 +5,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a single game session of Mastermind.
@@ -37,8 +36,9 @@ public class Game {
     }
 
     public void start(){
-       if (this.status == Status.PENDING) {
-           this.status = Status.IN_PROGRESS;
+       switch (this.status) {
+           case PENDING -> this.status = Status.IN_PROGRESS;
+           case IN_PROGRESS, WON, LOST -> throw new IllegalStateException("Game already started");
        }
     }
 
@@ -46,6 +46,11 @@ public class Game {
         if (guess == null) {
             throw new IllegalArgumentException("guess is null");
         }
+
+        if (this.status != Status.IN_PROGRESS) {
+            throw new IllegalArgumentException();
+        }
+
         this.guesses.add(guess);
 
         Feedback feedback = Feedback.create(this.answer, guess);
@@ -71,5 +76,9 @@ public class Game {
         }
 
         return historyList;
+    }
+
+    public int getRemainingAttempts() {
+        return this.maxAttempts - this.guesses.size();
     }
 }
