@@ -63,7 +63,13 @@ public class Game {
         return feedback;
     }
 
-    public Map<String, String> getHistory() {
-        return Map.of("guess", "feedback");
+    public List<History> getHistory() {
+        List<History> historyList = new ArrayList<>();
+
+        for (int i = 0; i < guesses.size(); i++) {
+            historyList.add(new History(guesses.get(i), feedbacks.get(i)));
+        }
+
+        return historyList;
     }
 }
