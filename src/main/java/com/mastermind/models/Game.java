@@ -31,7 +31,7 @@ public class Game {
     public void end(){}
 
     public Feedback playerGuess(NumCombination guess){
-        return new Feedback();
+        return new Feedback(0,0);
     }
 
     public Map<String, String> getHistory() {
