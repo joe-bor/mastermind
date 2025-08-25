@@ -3,6 +3,7 @@ package com.mastermind.models;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,12 +27,40 @@ public class Game {
     private List<NumCombination> guesses;
     private List<Feedback> feedbacks;
 
-    public void start(){}
+    Game(Player player, NumCombination answer) {
+        this.status = Status.PENDING;
+        this.player = player;
+        this.answer = answer;
+        this.maxAttempts = 10;
+        this.guesses = new ArrayList<>();
+        this.feedbacks = new ArrayList<>();
+    }
 
-    public void end(){}
+    public void start(){
+       if (this.status == Status.PENDING) {
+           this.status = Status.IN_PROGRESS;
+       }
+    }
 
     public Feedback playerGuess(NumCombination guess){
-        return new Feedback(0,0);
+        if (guess == null) {
+            throw new IllegalArgumentException("guess is null");
+        }
+        this.guesses.add(guess);
+
+        Feedback feedback = Feedback.create(this.answer, guess);
+        this.feedbacks.add(feedback);
+
+        // Check win condition
+        if (feedback.getCorrectPositions() == this.answer.getExpectedSize()) {
+            this.status = Status.WON;
+            // Check lose condition
+        } else if (this.guesses.size() == this.maxAttempts) {
+            this.status = Status.LOST;
+        }
+        // else keep playing
+
+        return feedback;
     }
 
     public Map<String, String> getHistory() {
