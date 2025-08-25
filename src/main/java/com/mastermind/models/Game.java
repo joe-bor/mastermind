@@ -3,8 +3,8 @@ package com.mastermind.models;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Represents a single game session of Mastermind.
@@ -26,15 +26,59 @@ public class Game {
     private List<NumCombination> guesses;
     private List<Feedback> feedbacks;
 
-    public void start(){}
-
-    public void end(){}
-
-    public Feedback playerGuess(NumCombination guess){
-        return new Feedback(0,0);
+    Game(Player player, NumCombination answer) {
+        this.status = Status.PENDING;
+        this.player = player;
+        this.answer = answer;
+        this.maxAttempts = 10;
+        this.guesses = new ArrayList<>();
+        this.feedbacks = new ArrayList<>();
     }
 
-    public Map<String, String> getHistory() {
-        return Map.of("guess", "feedback");
+    public void start(){
+       switch (this.status) {
+           case PENDING -> this.status = Status.IN_PROGRESS;
+           case IN_PROGRESS, WON, LOST -> throw new IllegalStateException("Game already started");
+       }
+    }
+
+    public Feedback playerGuess(NumCombination guess){
+        if (guess == null) {
+            throw new IllegalArgumentException("guess is null");
+        }
+
+        if (this.status != Status.IN_PROGRESS) {
+            throw new IllegalArgumentException();
+        }
+
+        this.guesses.add(guess);
+
+        Feedback feedback = Feedback.create(this.answer, guess);
+        this.feedbacks.add(feedback);
+
+        // Check win condition
+        if (feedback.getCorrectPositions() == this.answer.getExpectedSize()) {
+            this.status = Status.WON;
+            // Check lose condition
+        } else if (this.guesses.size() == this.maxAttempts) {
+            this.status = Status.LOST;
+        }
+        // else keep playing
+
+        return feedback;
+    }
+
+    public List<History> getHistory() {
+        List<History> historyList = new ArrayList<>();
+
+        for (int i = 0; i < guesses.size(); i++) {
+            historyList.add(new History(guesses.get(i), feedbacks.get(i)));
+        }
+
+        return historyList;
+    }
+
+    public int getRemainingAttempts() {
+        return this.maxAttempts - this.guesses.size();
     }
 }
