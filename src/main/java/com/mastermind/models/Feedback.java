@@ -33,44 +33,84 @@ public class Feedback {
             return new Feedback(guess.getExpectedSize(), guess.getExpectedSize());
         }
 
-        // Walk the two lists and compare digits and their positions
-        int correctDigitCounter = 0;
-        int correctPositionCounter = 0;
+        int correctPositions = countCorrectPositions(answer, guess);
+        int correctDigits = countCorrectDigits(answer, guess);
 
-        for (int i = 0; i < answer.getNumbers().size(); i++) {
-            int answerEntry = answer.getNumbers().get(i);
-            int guessEntry = guess.getNumbers().get(i);
+        return new Feedback(correctDigits, correctPositions);
+    }
 
-            // if the two numbers on the same index are the same then the position is correct
-            if (answerEntry == guessEntry) correctPositionCounter++;
-        }
+    /**
+     * Counts the number of digits that match both value and position.
+     */
+    private static int countCorrectPositions(NumCombination answer, NumCombination guess) {
+        int correctPositions = 0;
+        List<Integer> answerNumbers = answer.getNumbers();
+        List<Integer> guessNumbers = guess.getNumbers();
 
-        Map<Integer, Integer> answerFreqCounter = toFreqCounter(answer.getNumbers());
-        Map<Integer, Integer> guessFreqCounter = toFreqCounter(guess.getNumbers());
-
-        // Remove position matches from frequency counters to avoid double counting
-        for (int i = 0; i < answer.getNumbers().size(); i++) {
-            int answerEntry = answer.getNumbers().get(i);
-            int guessEntry = guess.getNumbers().get(i);
-
-            if (answerEntry == guessEntry) {
-                answerFreqCounter.put(answerEntry, answerFreqCounter.get(answerEntry) - 1);
-                guessFreqCounter.put(guessEntry, guessFreqCounter.get(guessEntry) - 1);
+        for (int i = 0; i < answerNumbers.size(); i++) {
+            if (answerNumbers.get(i).equals(guessNumbers.get(i))) {
+                correctPositions++;
             }
         }
 
-        // Count remaining digit matches
+        return correctPositions;
+    }
+
+    /**
+     * Counts the total number of correct digits, including both exact position matches
+     * and digits that exist in both sequences but in different positions.
+     */
+    private static int countCorrectDigits(NumCombination answer, NumCombination guess) {
+        Map<Integer, Integer> answerFreqCounter = toFreqCounter(answer.getNumbers());
+        Map<Integer, Integer> guessFreqCounter = toFreqCounter(guess.getNumbers());
+
+        // Remove exact position matches from the frequency counters to avoid double counting
+        removePositionMatches(answer, guess, answerFreqCounter, guessFreqCounter);
+
+        // Count remaining digit matches (correct digit, different position)
+        int digitOnlyMatches = countDigitOnlyMatches(answerFreqCounter, guessFreqCounter);
+        int exactPositionMatches = countCorrectPositions(answer, guess);
+
+        return digitOnlyMatches + exactPositionMatches;
+    }
+
+    /**
+     * Removes exact position matches from frequency counters to prevent double counting.
+     * This ensures digits counted as position matches are not also counted as digit-only matches.
+     */
+    private static void removePositionMatches(NumCombination answer, NumCombination guess,
+                                              Map<Integer, Integer> answerFreqCounter,
+                                              Map<Integer, Integer> guessFreqCounter) {
+        List<Integer> answerNumbers = answer.getNumbers();
+        List<Integer> guessNumbers = guess.getNumbers();
+
+        for (int i = 0; i < answerNumbers.size(); i++) {
+            Integer answerDigit = answerNumbers.get(i);
+            Integer guessDigit = guessNumbers.get(i);
+
+            if (answerDigit.equals(guessDigit)) {
+                answerFreqCounter.put(answerDigit, answerFreqCounter.get(answerDigit) - 1);
+                guessFreqCounter.put(guessDigit, guessFreqCounter.get(guessDigit) - 1);
+            }
+        }
+    }
+
+    /**
+     * Counts digits that appear in both sequences but in different positions.
+     * Uses frequency counters that have already had position matches removed.
+     */
+    private static int countDigitOnlyMatches(Map<Integer, Integer> answerFreqCounter,
+                                             Map<Integer, Integer> guessFreqCounter) {
+        int digitOnlyMatches = 0;
+
         for (Map.Entry<Integer, Integer> entry : answerFreqCounter.entrySet()) {
-            int digit = entry.getKey();
-            int answerCount = entry.getValue();
-            int guessCount = guessFreqCounter.getOrDefault(digit, 0);
-            correctDigitCounter += Math.min(answerCount, guessCount);
+            Integer digit = entry.getKey();
+            Integer answerCount = entry.getValue();
+            Integer guessCount = guessFreqCounter.getOrDefault(digit, 0);
+            digitOnlyMatches += Math.min(answerCount, guessCount);
         }
 
-        // Add position matches to get total correct digits
-        correctDigitCounter += correctPositionCounter;
-
-        return new Feedback(correctDigitCounter, correctPositionCounter);
+        return digitOnlyMatches;
     }
 
     @Override
