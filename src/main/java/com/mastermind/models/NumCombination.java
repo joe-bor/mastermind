@@ -12,4 +12,12 @@ import java.util.List;
 @Data
 public class NumCombination {
     private final List<Integer> numbers;
+
+    public NumCombination(List<Integer> numbers) {
+        if (numbers == null) {
+            throw new IllegalArgumentException("Numbers list cannot be null");
+        }
+
+        this.numbers = List.copyOf(numbers);
+    }
 }
