@@ -73,6 +73,19 @@ public class Feedback {
         return new Feedback(correctDigitCounter, correctPositionCounter);
     }
 
+    @Override
+    public String toString(){
+        if (this.correctDigits == 0 && this.correctPositions == 0) {
+            return "All incorrect";
+        }
+
+        if (this.correctDigits == this.correctPositions) {
+            return "All correct";
+        }
+
+        return "%d correct numbers, and %d correct location".formatted(correctDigits, correctPositions);
+    }
+
     private static Map<Integer, Integer> toFreqCounter(List<Integer> numList){
         Map<Integer, Integer> freqCounter = new HashMap<>();
         for (int num : numList) {
