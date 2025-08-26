@@ -26,7 +26,7 @@ public class Game {
     private List<NumCombination> guesses;
     private List<Feedback> feedbacks;
 
-    Game(Player player, NumCombination answer) {
+    public Game(Player player, NumCombination answer) {
         this.status = Status.PENDING;
         this.player = player;
         this.answer = answer;
