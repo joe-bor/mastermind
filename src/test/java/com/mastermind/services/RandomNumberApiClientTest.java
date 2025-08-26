@@ -69,6 +69,7 @@ class RandomNumberApiClientTest {
         void shouldParseValidApiResponseCorrectly() throws IOException, InterruptedException {
             // Arrange
             String validResponse = "0\n1\n2\n3";
+            when(mockResponse.statusCode()).thenReturn(200);
             when(mockResponse.body()).thenReturn(validResponse);
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenReturn(mockResponse);
@@ -87,6 +88,7 @@ class RandomNumberApiClientTest {
         void shouldHandleResponseWithDuplicateNumbers() throws IOException, InterruptedException {
             // Arrange
             String responseWithDuplicates = "1\n1\n2\n2";
+            when(mockResponse.statusCode()).thenReturn(200);
             when(mockResponse.body()).thenReturn(responseWithDuplicates);
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenReturn(mockResponse);
@@ -105,6 +107,7 @@ class RandomNumberApiClientTest {
         void shouldHandleResponseWithMaximumValues() throws IOException, InterruptedException {
             // Arrange
             String maxValueResponse = "7\n7\n7\n7";
+            when(mockResponse.statusCode()).thenReturn(200);
             when(mockResponse.body()).thenReturn(maxValueResponse);
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenReturn(mockResponse);
@@ -122,6 +125,7 @@ class RandomNumberApiClientTest {
         void shouldHandleResponseWithMinimumValues() throws IOException, InterruptedException {
             // Arrange
             String minValueResponse = "0\n0\n0\n0";
+            when(mockResponse.statusCode()).thenReturn(200);
             when(mockResponse.body()).thenReturn(minValueResponse);
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenReturn(mockResponse);
@@ -139,6 +143,7 @@ class RandomNumberApiClientTest {
         void shouldTrimWhitespaceFromResponse() throws IOException, InterruptedException {
             // Arrange
             String responseWithWhitespace = "  \n0\n1\n2\n3\n  ";
+            when(mockResponse.statusCode()).thenReturn(200);
             when(mockResponse.body()).thenReturn(responseWithWhitespace);
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenReturn(mockResponse);
@@ -161,6 +166,7 @@ class RandomNumberApiClientTest {
         void shouldMakeGetRequestToCorrectUrl() throws IOException, InterruptedException {
             // Arrange
             String validResponse = "1\n2\n3\n4";
+            when(mockResponse.statusCode()).thenReturn(200);
             when(mockResponse.body()).thenReturn(validResponse);
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenReturn(mockResponse);
@@ -187,33 +193,35 @@ class RandomNumberApiClientTest {
     class ErrorHandling {
 
         @Test
-        @DisplayName("should throw RuntimeException when IOException occurs")
-        void shouldThrowRuntimeExceptionWhenIOExceptionOccurs() throws IOException, InterruptedException {
+        @DisplayName("should throw RandomNumberApiException when IOException occurs")
+        void shouldThrowRandomNumberApiExceptionWhenIOExceptionOccurs() throws IOException, InterruptedException {
             // Arrange
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenThrow(new IOException("Network error"));
 
             // Act & Assert
-            RuntimeException exception = assertThrows(RuntimeException.class, 
+            RandomNumberApiException exception = assertThrows(RandomNumberApiException.class, 
                     () -> apiClient.getRandomNums());
 
             assertInstanceOf(IOException.class, exception.getCause());
             assertEquals("Network error", exception.getCause().getMessage());
+            assertTrue(exception.getMessage().contains("Network error while contacting Random.org API"));
         }
 
         @Test
-        @DisplayName("should throw RuntimeException when InterruptedException occurs")
-        void shouldThrowRuntimeExceptionWhenInterruptedExceptionOccurs() throws IOException, InterruptedException {
+        @DisplayName("should throw RandomNumberApiException when InterruptedException occurs")
+        void shouldThrowRandomNumberApiExceptionWhenInterruptedExceptionOccurs() throws IOException, InterruptedException {
             // Arrange
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenThrow(new InterruptedException("Thread interrupted"));
 
             // Act & Assert
-            RuntimeException exception = assertThrows(RuntimeException.class, 
+            RandomNumberApiException exception = assertThrows(RandomNumberApiException.class, 
                     () -> apiClient.getRandomNums());
 
             assertInstanceOf(InterruptedException.class, exception.getCause());
             assertEquals("Thread interrupted", exception.getCause().getMessage());
+            assertTrue(exception.getMessage().contains("Network error while contacting Random.org API"));
         }
 
         @Test
@@ -221,6 +229,7 @@ class RandomNumberApiClientTest {
         void shouldHandleMalformedResponseNumbers() throws IOException, InterruptedException {
             // Arrange
             String malformedResponse = "0\nabc\n2\n3";
+            when(mockResponse.statusCode()).thenReturn(200);
             when(mockResponse.body()).thenReturn(malformedResponse);
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenReturn(mockResponse);
@@ -238,6 +247,7 @@ class RandomNumberApiClientTest {
         @DisplayName("should handle empty response body")
         void shouldHandleEmptyResponseBody() throws IOException, InterruptedException {
             // Arrange
+            when(mockResponse.statusCode()).thenReturn(200);
             when(mockResponse.body()).thenReturn("");
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenReturn(mockResponse);
@@ -252,6 +262,7 @@ class RandomNumberApiClientTest {
         void shouldHandleResponseWithWrongNumberCount() throws IOException, InterruptedException {
             // Arrange
             String wrongCountResponse = "1\n2\n3"; // Only 3 numbers instead of 4
+            when(mockResponse.statusCode()).thenReturn(200);
             when(mockResponse.body()).thenReturn(wrongCountResponse);
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenReturn(mockResponse);
@@ -266,6 +277,7 @@ class RandomNumberApiClientTest {
         void shouldHandleResponseWithNumbersOutsideValidRange() throws IOException, InterruptedException {
             // Arrange
             String outOfRangeResponse = "0\n1\n2\n8"; // 8 is outside 0-7 range
+            when(mockResponse.statusCode()).thenReturn(200);
             when(mockResponse.body()).thenReturn(outOfRangeResponse);
             when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
                     .thenReturn(mockResponse);
@@ -273,6 +285,98 @@ class RandomNumberApiClientTest {
             // Act & Assert
             // NumCombination constructor should validate range
             assertThrows(IllegalArgumentException.class, () -> apiClient.getRandomNums());
+        }
+    }
+    
+    @Nested
+    @DisplayName("HTTP status code handling")
+    class HttpStatusCodeHandling {
+        
+        @Test
+        @DisplayName("should handle 503 Service Unavailable with error message")
+        void shouldHandle503ServiceUnavailableWithErrorMessage() throws IOException, InterruptedException {
+            // Arrange
+            String errorResponse = "Error: Server too busy right now, please back off";
+            when(mockResponse.statusCode()).thenReturn(503);
+            when(mockResponse.body()).thenReturn(errorResponse);
+            when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                    .thenReturn(mockResponse);
+
+            // Act & Assert
+            RandomNumberApiException exception = assertThrows(RandomNumberApiException.class,
+                    () -> apiClient.getRandomNums());
+            
+            assertTrue(exception.getMessage().contains("Random.org API error"));
+            assertTrue(exception.getMessage().contains("Error: Server too busy right now"));
+        }
+        
+        @Test
+        @DisplayName("should handle 503 response without Error prefix")
+        void shouldHandle503ResponseWithoutErrorPrefix() throws IOException, InterruptedException {
+            // Arrange
+            String unexpectedErrorResponse = "Something went wrong";
+            when(mockResponse.statusCode()).thenReturn(503);
+            when(mockResponse.body()).thenReturn(unexpectedErrorResponse);
+            when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                    .thenReturn(mockResponse);
+
+            // Act & Assert
+            RandomNumberApiException exception = assertThrows(RandomNumberApiException.class,
+                    () -> apiClient.getRandomNums());
+            
+            assertTrue(exception.getMessage().contains("Random.org API error"));
+            assertTrue(exception.getMessage().contains("Unknown error from Random.org API"));
+        }
+        
+        @Test
+        @DisplayName("should handle unexpected HTTP status codes")
+        void shouldHandleUnexpectedHttpStatusCodes() throws IOException, InterruptedException {
+            // Arrange - Test 404 Not Found
+            when(mockResponse.statusCode()).thenReturn(404);
+            when(mockResponse.body()).thenReturn("Not Found");
+            when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                    .thenReturn(mockResponse);
+
+            // Act & Assert
+            RandomNumberApiException exception = assertThrows(RandomNumberApiException.class,
+                    () -> apiClient.getRandomNums());
+            
+            assertTrue(exception.getMessage().contains("Unexpected HTTP status: 404"));
+            assertTrue(exception.getMessage().contains("Not Found"));
+        }
+        
+        @Test
+        @DisplayName("should handle 500 Internal Server Error")
+        void shouldHandle500InternalServerError() throws IOException, InterruptedException {
+            // Arrange
+            when(mockResponse.statusCode()).thenReturn(500);
+            when(mockResponse.body()).thenReturn("Internal Server Error");
+            when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                    .thenReturn(mockResponse);
+
+            // Act & Assert
+            RandomNumberApiException exception = assertThrows(RandomNumberApiException.class,
+                    () -> apiClient.getRandomNums());
+            
+            assertTrue(exception.getMessage().contains("Unexpected HTTP status: 500"));
+            assertTrue(exception.getMessage().contains("Internal Server Error"));
+        }
+        
+        @Test
+        @DisplayName("should handle null response body in 503 error")
+        void shouldHandleNullResponseBodyIn503Error() throws IOException, InterruptedException {
+            // Arrange
+            when(mockResponse.statusCode()).thenReturn(503);
+            when(mockResponse.body()).thenReturn(null);
+            when(mockHttpClient.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class)))
+                    .thenReturn(mockResponse);
+
+            // Act & Assert
+            RandomNumberApiException exception = assertThrows(RandomNumberApiException.class,
+                    () -> apiClient.getRandomNums());
+            
+            assertTrue(exception.getMessage().contains("Random.org API error"));
+            assertTrue(exception.getMessage().contains("Unknown error from Random.org API"));
         }
     }
 }
