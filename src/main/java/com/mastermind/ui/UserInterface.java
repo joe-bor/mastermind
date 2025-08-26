@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
- * Responsible for handling user interactions, displaying messages and game state.
+ * Responsible for handling user inputs, displaying messages and game state.
  */
 public class UserInterface {
     private static final Scanner SCANNER = new Scanner(System.in);
@@ -56,6 +56,29 @@ public class UserInterface {
             You have 10 attempts to crack the code.
             
             """);
+    }
+
+    public int displayGameMenu(int remainingAttempts) {
+        while (true) {
+            System.out.printf("""
+                ========================================
+                           MASTERMIND - GAME MENU
+                ========================================
+                Remaining attempts: %d
+                
+                Choose an option:
+                1. Make a guess
+                2. Show game history
+                3. Exit game
+                
+                Enter your choice (1-3): """, remainingAttempts);
+            
+            try {
+                return Integer.parseInt(SCANNER.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.\n");
+            }
+        }
     }
 
     public void displayFeedback(NumCombination guess, Feedback feedback) {
