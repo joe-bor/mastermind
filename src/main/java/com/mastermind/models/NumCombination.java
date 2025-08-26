@@ -74,4 +74,11 @@ public class NumCombination {
 
         return new NumCombination(numbers);
     }
+
+    @Override
+    public String toString() {
+        return String.join(" ", numbers.stream()
+            .map(String::valueOf)
+            .toArray(String[]::new));
+    }
 }
