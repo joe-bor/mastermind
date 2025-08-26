@@ -25,7 +25,7 @@ public class RandomNumberApiClient {
         this.client = client;
     }
 
-    public NumCombination getRandomNums() {
+    public NumCombination getRandomNums() throws RandomNumberApiException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(INTEGER_GEN_URI))
                 .GET()
@@ -34,22 +34,43 @@ public class RandomNumberApiClient {
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            // Split body on every new line (Ref: https://www.random.org/clients/http/api/)
-            String[] lines = response.body()
-                    .trim()
-                    .split(Pattern.quote("\n"));
-
-            // String[] --> List<Integer>
-            List<Integer> integerList = Arrays.stream(lines)
-                    .map(Integer::parseInt)
-                    .toList();
-
-            return new NumCombination(integerList);
+            
+            // Check HTTP status code first
+            if (response.statusCode() == 200) {
+                // Success - parse the numbers
+                return parseSuccessResponse(response.body());
+            } else if (response.statusCode() == 503) {
+                // Service unavailable - handle error response
+                throw new RandomNumberApiException("Random.org API error: " + extractErrorMessage(response.body()));
+            } else {
+                // Other HTTP status codes
+                throw new RandomNumberApiException("Unexpected HTTP status: " + response.statusCode() + " - " + response.body());
+            }
 
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new RandomNumberApiException("Network error while contacting Random.org API", e);
         }
+    }
+    
+    private NumCombination parseSuccessResponse(String responseBody) {
+        // Split body on every new line (Ref: https://www.random.org/clients/http/api/)
+        String[] lines = responseBody
+                .trim()
+                .split(Pattern.quote("\n"));
 
+        // String[] --> List<Integer>
+        List<Integer> integerList = Arrays.stream(lines)
+                .map(Integer::parseInt)
+                .toList();
+
+        return new NumCombination(integerList);
+    }
+    
+    private String extractErrorMessage(String responseBody) {
+        // Look for "Error:" prefix as per API docs
+        if (responseBody != null && responseBody.startsWith("Error:")) {
+            return responseBody;
+        }
+        return "Unknown error from Random.org API";
     }
 }
