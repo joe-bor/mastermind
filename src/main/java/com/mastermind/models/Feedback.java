@@ -19,6 +19,7 @@ import java.util.Map;
 public class Feedback {
     private final int correctDigits;
     private final int correctPositions;
+    private final int expectedSize;
 
     public static Feedback create(NumCombination answer, NumCombination guess) {
         if (answer == null || guess == null) {
@@ -30,13 +31,14 @@ public class Feedback {
         }
 
         if (answer.equals(guess)) {
-            return new Feedback(guess.getExpectedSize(), guess.getExpectedSize());
+            int size = guess.getExpectedSize();
+            return new Feedback(size, size, size);
         }
 
         int correctPositions = countCorrectPositions(answer, guess);
         int correctDigits = countCorrectDigits(answer, guess);
 
-        return new Feedback(correctDigits, correctPositions);
+        return new Feedback(correctDigits, correctPositions, answer.getExpectedSize());
     }
 
     /**
@@ -119,7 +121,7 @@ public class Feedback {
             return "All incorrect";
         }
 
-        if (this.correctDigits == this.correctPositions) {
+        if (this.correctPositions == this.expectedSize) {
             return "All correct";
         }
 
