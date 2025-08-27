@@ -73,9 +73,11 @@ class GameControllerTest {
         @DisplayName("should display welcome message and create game on startup")
         void shouldDisplayWelcomeMessageAndCreateGameOnStartup() {
             // Arrange
+            when(mockUI.promptForPlayerName()).thenReturn("TestPlayer");
             when(mockGameFactory.createGame(any(Player.class))).thenReturn(mockGame);
             when(mockGame.getStatus()).thenReturn(Status.IN_PROGRESS);
-            when(mockUI.displayGameMenu(anyInt())).thenReturn(3); // Exit immediately
+            when(mockGame.getPlayer()).thenReturn(new Player("TestPlayer"));
+            when(mockUI.displayGameMenu(anyInt(), anyString())).thenReturn(3); // Exit immediately
             when(mockUI.promptForNewGame()).thenReturn(false);
 
             // Act
@@ -83,6 +85,7 @@ class GameControllerTest {
 
             // Assert
             verify(mockUI, times(1)).displayWelcomeMessage();
+            verify(mockUI, times(1)).promptForPlayerName();
             verify(mockGameFactory, times(1)).createGame(any(Player.class));
             verify(mockGame, times(1)).start();
         }
@@ -91,6 +94,7 @@ class GameControllerTest {
         @DisplayName("should handle game creation failure gracefully")
         void shouldHandleGameCreationFailureGracefully() {
             // Arrange
+            when(mockUI.promptForPlayerName()).thenReturn("TestPlayer");
             RuntimeException gameCreationError = new RuntimeException("API failure");
             when(mockGameFactory.createGame(any(Player.class))).thenThrow(gameCreationError);
             when(mockUI.promptForNewGame()).thenReturn(false);
@@ -111,7 +115,9 @@ class GameControllerTest {
 
         @BeforeEach
         void setUpGameMocks() {
+            when(mockUI.promptForPlayerName()).thenReturn("TestPlayer");
             when(mockGameFactory.createGame(any(Player.class))).thenReturn(mockGame);
+            when(mockGame.getPlayer()).thenReturn(new Player("TestPlayer"));
             when(mockUI.promptForNewGame()).thenReturn(false);
         }
 
@@ -128,7 +134,7 @@ class GameControllerTest {
                 .thenReturn(Status.WON);         // After guess - end game
             when(mockGame.getRemainingAttempts()).thenReturn(9);
             when(mockGame.getAnswer()).thenReturn(testAnswer);
-            when(mockUI.displayGameMenu(9)).thenReturn(1); // MAKE_GUESS choice
+            when(mockUI.displayGameMenu(9, "TestPlayer")).thenReturn(1); // MAKE_GUESS choice
             when(mockUI.promptForGuess(9)).thenReturn(testGuess);
             when(mockGame.playerGuess(testGuess)).thenReturn(testFeedback);
 
@@ -136,11 +142,11 @@ class GameControllerTest {
             gameController.startGame();
 
             // Assert
-            verify(mockUI, times(1)).displayGameMenu(9);
+            verify(mockUI, times(1)).displayGameMenu(9, "TestPlayer");
             verify(mockUI, times(1)).promptForGuess(9);
             verify(mockGame, times(1)).playerGuess(testGuess);
             verify(mockUI, times(1)).displayFeedback(testGuess, testFeedback);
-            verify(mockUI, times(1)).displayGameResults(Status.WON, testAnswer); // Called once in handleGuess when game ends
+            verify(mockUI, times(1)).displayGameResults(Status.WON, testAnswer, "TestPlayer"); // Called once in handleGuess when game ends
         }
 
         @Test
@@ -153,13 +159,13 @@ class GameControllerTest {
             when(mockGame.getRemainingAttempts()).thenReturn(5);
             when(mockGame.getAnswer()).thenReturn(new NumCombination(Arrays.asList(1, 2, 3, 4)));
             when(mockGame.getHistory()).thenReturn(Collections.emptyList());
-            when(mockUI.displayGameMenu(5)).thenReturn(2); // SHOW_HISTORY choice
+            when(mockUI.displayGameMenu(5, "TestPlayer")).thenReturn(2); // SHOW_HISTORY choice
 
             // Act
             gameController.startGame();
 
             // Assert
-            verify(mockUI, times(1)).displayGameMenu(5);
+            verify(mockUI, times(1)).displayGameMenu(5, "TestPlayer");
             verify(mockUI, times(1)).displayGameHistory(Collections.emptyList());
         }
 
@@ -169,15 +175,15 @@ class GameControllerTest {
             // Arrange
             when(mockGame.getStatus()).thenReturn(Status.IN_PROGRESS);
             when(mockGame.getRemainingAttempts()).thenReturn(7);
-            when(mockUI.displayGameMenu(7)).thenReturn(3); // EXIT_GAME choice
+            when(mockUI.displayGameMenu(7, "TestPlayer")).thenReturn(3); // EXIT_GAME choice
 
             // Act
             gameController.startGame();
 
             // Assert
-            verify(mockUI, times(1)).displayGameMenu(7);
+            verify(mockUI, times(1)).displayGameMenu(7, "TestPlayer");
             // Should not call displayGameResults when user exits manually
-            verify(mockUI, never()).displayGameResults(any(Status.class), any(NumCombination.class));
+            verify(mockUI, never()).displayGameResults(any(Status.class), any(NumCombination.class), anyString());
         }
 
         @Test
@@ -189,7 +195,7 @@ class GameControllerTest {
                 .thenReturn(Status.IN_PROGRESS)  // Second check after invalid choice - continue
                 .thenReturn(Status.IN_PROGRESS); // Third check - allow exit choice
             when(mockGame.getRemainingAttempts()).thenReturn(8);
-            when(mockUI.displayGameMenu(8))
+            when(mockUI.displayGameMenu(8, "TestPlayer"))
                 .thenReturn(99)  // Invalid choice first
                 .thenReturn(3);  // Then exit
 
@@ -197,7 +203,7 @@ class GameControllerTest {
             gameController.startGame();
 
             // Assert
-            verify(mockUI, times(2)).displayGameMenu(8);
+            verify(mockUI, times(2)).displayGameMenu(8, "TestPlayer");
             verify(mockUI, times(1)).displayError("Invalid menu choice. Please try again.");
         }
     }
@@ -212,6 +218,13 @@ class GameControllerTest {
             // Arrange
             Game firstGame = mock(Game.class);
             Game secondGame = mock(Game.class);
+            
+            when(mockUI.promptForPlayerName())
+                .thenReturn("Player1")
+                .thenReturn("Player2");
+            
+            when(firstGame.getPlayer()).thenReturn(new Player("Player1"));
+            when(secondGame.getPlayer()).thenReturn(new Player("Player2"));
             
             when(mockGameFactory.createGame(any(Player.class)))
                 .thenReturn(firstGame)
@@ -242,9 +255,11 @@ class GameControllerTest {
         @DisplayName("should stop when user declines to play again")
         void shouldStopWhenUserDeclinesToPlayAgain() {
             // Arrange
+            when(mockUI.promptForPlayerName()).thenReturn("TestPlayer");
             when(mockGameFactory.createGame(any(Player.class))).thenReturn(mockGame);
             when(mockGame.getStatus()).thenReturn(Status.WON);
             when(mockGame.getAnswer()).thenReturn(new NumCombination(Arrays.asList(1, 2, 3, 4)));
+            when(mockGame.getPlayer()).thenReturn(new Player("TestPlayer"));
             when(mockUI.promptForNewGame()).thenReturn(false); // Don't play again
 
             // Act

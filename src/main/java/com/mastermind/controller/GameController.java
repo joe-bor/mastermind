@@ -21,7 +21,7 @@ public class GameController {
 
     public void startGame() {
         ui.displayWelcomeMessage();
-        
+
         boolean playAgain = true;
         while (playAgain) {
             try {
@@ -38,14 +38,13 @@ public class GameController {
     }
 
     private Game createNewGame() {
-        // TODO: Ask for player name later; maybe add method in UI that displays message and captures input
-        Player player = new Player("Player");
+        Player player = new Player(ui.promptForPlayerName());
         return gameFactory.createGame(player);
     }
 
     private void gameLoop(Game game) {
         while (game.getStatus() == Status.IN_PROGRESS) {
-            int userChoice = ui.displayGameMenu(game.getRemainingAttempts());
+            int userChoice = ui.displayGameMenu(game.getRemainingAttempts(), game.getPlayer().getName());
             MenuChoice choice = MenuChoice.fromValue(userChoice);
             
             switch (choice) {
@@ -67,7 +66,7 @@ public class GameController {
         
         // Check if game ended after this guess
         if (game.getStatus() != Status.IN_PROGRESS) {
-            ui.displayGameResults(game.getStatus(), game.getAnswer());
+            ui.displayGameResults(game.getStatus(), game.getAnswer(), game.getPlayer().getName());
         }
     }
 }
