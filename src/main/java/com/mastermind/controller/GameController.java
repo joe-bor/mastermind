@@ -56,12 +56,8 @@ public class GameController {
                     return;
                 }
                 case null -> ui.displayError("Invalid menu choice. Please try again.");
-
             }
         }
-        
-        // Game finished naturally (won or lost)
-        ui.displayGameResults(game.getStatus(), game.getAnswer());
     }
 
     private void handleGuess(Game game) {
