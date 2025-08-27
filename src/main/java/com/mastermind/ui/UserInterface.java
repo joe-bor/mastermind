@@ -19,7 +19,7 @@ public class UserInterface {
         while (true) {
             System.out.printf("Enter your guess (%d attempts remaining): ", remainingAttempts);
             String input = SCANNER.nextLine().trim();
-            
+
             try {
                 return NumCombination.parse(input);
             } catch (IllegalArgumentException e) {
@@ -73,7 +73,7 @@ public class UserInterface {
             """);
     }
 
-    public int displayGameMenu(int remainingAttempts, String name) {
+    public int displayGameMenu(String name, int remainingAttempts, int menuSize) {
         while (true) {
             System.out.printf("""
                 
@@ -87,8 +87,9 @@ public class UserInterface {
                 1. Make a guess
                 2. Show game history
                 3. Exit game
+                4. Use a Hint :)
                 
-                Enter your choice (1-3):\s """, name, remainingAttempts);
+                Enter your choice (1-%d):\s """, name, remainingAttempts, menuSize);
             
             try {
                 return Integer.parseInt(SCANNER.nextLine().trim());
@@ -159,5 +160,9 @@ public class UserInterface {
 
     public void displayError(String message) {
         System.out.println("Error: " + message);
+    }
+
+    public void displayHint(String numFromAnswer) {
+        System.out.println("The combination contains a number " + numFromAnswer);
     }
 }
