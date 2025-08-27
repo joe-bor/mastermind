@@ -50,24 +50,36 @@ public class UserInterface {
         }
     }
 
+    public String promptForPlayerName() {
+        String name;
+
+        do {
+            System.out.print("What is your name?: ");
+            name = SCANNER.nextLine().trim();
+        } while (name.isBlank());
+
+        return name;
+    }
+
 
     // -- Display --
     public void displayWelcomeMessage() {
         System.out.print("""
             ***** Welcome to Mastermind-CLI *****
-            Guess the secret 4-number combination!
-            Numbers range from 0-7, duplicates allowed.
-            You have 10 attempts to crack the code.
+            - Guess the secret 4-number combination!
+            - Numbers range from 0-7, duplicates allowed.
+            - You have 10 attempts to crack the code.
             
             """);
     }
 
-    public int displayGameMenu(int remainingAttempts) {
+    public int displayGameMenu(int remainingAttempts, String name) {
         while (true) {
             System.out.printf("""
                 
                 ========================================
                            MASTERMIND - GAME MENU
+                Player: %s
                 ========================================
                 Remaining attempts: %d
                 
@@ -76,7 +88,7 @@ public class UserInterface {
                 2. Show game history
                 3. Exit game
                 
-                Enter your choice (1-3):\s """, remainingAttempts);
+                Enter your choice (1-3):\s """, name, remainingAttempts);
             
             try {
                 return Integer.parseInt(SCANNER.nextLine().trim());
@@ -111,12 +123,12 @@ public class UserInterface {
         System.out.println();
     }
 
-    public void displayGameResults(Status status, NumCombination answer) {
+    public void displayGameResults(Status status, NumCombination answer, String name) {
         String message = status == Status.WON ? 
             """
             
             ========================================
-                      * * * CONGRATULATIONS! * * *
+                      * * * CONGRATULATIONS %s! * * *
                              YOU WON!
             
             The secret combination was: %s
@@ -126,7 +138,7 @@ public class UserInterface {
             """
             
             ========================================
-                      - - - GAME OVER - - -
+                      - - - GAME OVER %s - - -
                     You ran out of attempts
             
             The secret combination was: %s
@@ -134,7 +146,7 @@ public class UserInterface {
             
             """;
         
-        System.out.printf(message, answer.toString());
+        System.out.printf(message, name.toUpperCase(), answer.toString());
     }
 
     public void displayRemainingAttempts(int remaining) {
