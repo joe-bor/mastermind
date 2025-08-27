@@ -67,6 +67,7 @@ class FeedbackTest {
             // Assert
             assertEquals(4, result.getCorrectDigits());
             assertEquals(4, result.getCorrectPositions());
+            assertEquals(4, result.getExpectedSize());
         }
     }
 
@@ -87,6 +88,7 @@ class FeedbackTest {
             // Assert
             assertEquals(0, result.getCorrectDigits());
             assertEquals(0, result.getCorrectPositions());
+            assertEquals(4, result.getExpectedSize());
         }
     }
 
@@ -107,6 +109,7 @@ class FeedbackTest {
             // Assert
             assertEquals(2, result.getCorrectDigits());
             assertEquals(2, result.getCorrectPositions());
+            assertEquals(4, result.getExpectedSize());
         }
     }
 
@@ -127,6 +130,7 @@ class FeedbackTest {
             // Assert
             assertEquals(4, result.getCorrectDigits());
             assertEquals(0, result.getCorrectPositions());
+            assertEquals(4, result.getExpectedSize());
         }
 
         @Test
@@ -142,6 +146,7 @@ class FeedbackTest {
             // Assert
             assertEquals(3, result.getCorrectDigits()); // 1 (position), 4 (wrong position), 2 (wrong position)
             assertEquals(1, result.getCorrectPositions()); // only 1 at position 0
+            assertEquals(4, result.getExpectedSize());
         }
     }
 
@@ -162,6 +167,7 @@ class FeedbackTest {
             // Assert
             assertEquals(2, result.getCorrectDigits()); // only 2 ones match
             assertEquals(2, result.getCorrectPositions()); // positions 0 and 1
+            assertEquals(4, result.getExpectedSize());
         }
 
         @Test
@@ -177,6 +183,7 @@ class FeedbackTest {
             // Assert
             assertEquals(1, result.getCorrectDigits()); // only one 1 can match
             assertEquals(1, result.getCorrectPositions()); // position 0
+            assertEquals(4, result.getExpectedSize());
         }
 
         @Test
@@ -192,6 +199,7 @@ class FeedbackTest {
             // Assert
             assertEquals(3, result.getCorrectDigits()); // 1 position match (2 at pos 1), 2 digit matches (2 at pos 0, 1 at pos 3)
             assertEquals(1, result.getCorrectPositions()); // only position 1 has correct position
+            assertEquals(4, result.getExpectedSize());
         }
 
         @Test
@@ -207,6 +215,7 @@ class FeedbackTest {
             // Assert
             assertEquals(4, result.getCorrectDigits());
             assertEquals(4, result.getCorrectPositions());
+            assertEquals(4, result.getExpectedSize());
         }
     }
 
