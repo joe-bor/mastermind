@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Represents a single game session of Mastermind.
@@ -25,6 +26,7 @@ public class Game {
     private int maxAttempts;
     private List<NumCombination> guesses;
     private List<Feedback> feedbacks;
+    private int hintCount;
 
     public Game(Player player, NumCombination answer) {
         this.status = Status.PENDING;
@@ -33,6 +35,7 @@ public class Game {
         this.maxAttempts = 10;
         this.guesses = new ArrayList<>();
         this.feedbacks = new ArrayList<>();
+        this.hintCount = 2;
     }
 
     public void start(){
@@ -80,5 +83,19 @@ public class Game {
 
     public int getRemainingAttempts() {
         return this.maxAttempts - this.guesses.size();
+    }
+
+    public String getHint() {
+        if (this.hintCount == 0){
+            return "No more hints left";
+        }
+
+        int size = this.answer.getNumbers().size();
+        Random random = new Random();
+        this.hintCount--;
+
+        return this.answer.getNumbers()
+                .get(random.nextInt(size))
+                .toString();
     }
 }
