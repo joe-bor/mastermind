@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 class GameFactoryTest {
 
     @Mock
-    private RandomNumberApiClient mockApiClient;
+    private NumberGenerator mockNumberGenerator;
     
     private GameFactory gameFactory;
     private AutoCloseable mockCloseable;
@@ -29,7 +29,7 @@ class GameFactoryTest {
     @BeforeEach
     void setUp() {
         mockCloseable = MockitoAnnotations.openMocks(this);
-        gameFactory = new GameFactory(mockApiClient);
+        gameFactory = new GameFactory(mockNumberGenerator);
     }
 
     @AfterEach
@@ -42,13 +42,13 @@ class GameFactoryTest {
     class Constructor {
 
         @Test
-        @DisplayName("should create GameFactory with RandomNumberApiClient")
-        void shouldCreateGameFactoryWithRandomNumberApiClient() {
+        @DisplayName("should create GameFactory with NumberGenerator")
+        void shouldCreateGameFactoryWithNumberGenerator() {
             // Arrange
-            RandomNumberApiClient apiClient = mock(RandomNumberApiClient.class);
+            NumberGenerator numberGenerator = mock(NumberGenerator.class);
 
             // Act & Assert
-            assertDoesNotThrow(() -> new GameFactory(apiClient));
+            assertDoesNotThrow(() -> new GameFactory(numberGenerator));
         }
     }
 
@@ -57,12 +57,12 @@ class GameFactoryTest {
     class GameCreation {
 
         @Test
-        @DisplayName("should create game with provided player and API-generated answer")
-        void shouldCreateGameWithProvidedPlayerAndApiGeneratedAnswer() {
+        @DisplayName("should create game with provided player and generated answer")
+        void shouldCreateGameWithProvidedPlayerAndGeneratedAnswer() {
             // Arrange
             Player testPlayer = new Player("TestPlayer");
             NumCombination expectedAnswer = new NumCombination(Arrays.asList(1, 2, 3, 4));
-            when(mockApiClient.getRandomNums()).thenReturn(expectedAnswer);
+            when(mockNumberGenerator.generateNumbers()).thenReturn(expectedAnswer);
 
             // Act
             Game result = gameFactory.createGame(testPlayer);
@@ -78,23 +78,23 @@ class GameFactoryTest {
         }
 
         @Test
-        @DisplayName("should call API client exactly once per game creation")
-        void shouldCallApiClientExactlyOncePerGameCreation() {
+        @DisplayName("should call number generator exactly once per game creation")
+        void shouldCallNumberGeneratorExactlyOncePerGameCreation() {
             // Arrange
             Player testPlayer = new Player("TestPlayer");
             NumCombination mockAnswer = new NumCombination(Arrays.asList(0, 1, 2, 3));
-            when(mockApiClient.getRandomNums()).thenReturn(mockAnswer);
+            when(mockNumberGenerator.generateNumbers()).thenReturn(mockAnswer);
 
             // Act
             gameFactory.createGame(testPlayer);
 
             // Assert
-            verify(mockApiClient, times(1)).getRandomNums();
+            verify(mockNumberGenerator, times(1)).generateNumbers();
         }
 
         @Test
-        @DisplayName("should create multiple games with different API responses")
-        void shouldCreateMultipleGamesWithDifferentApiResponses() {
+        @DisplayName("should create multiple games with different generated answers")
+        void shouldCreateMultipleGamesWithDifferentGeneratedAnswers() {
             // Arrange
             Player player1 = new Player("Player1");
             Player player2 = new Player("Player2");
@@ -102,7 +102,7 @@ class GameFactoryTest {
             NumCombination answer1 = new NumCombination(Arrays.asList(1, 2, 3, 4));
             NumCombination answer2 = new NumCombination(Arrays.asList(5, 6, 7, 0));
             
-            when(mockApiClient.getRandomNums())
+            when(mockNumberGenerator.generateNumbers())
                 .thenReturn(answer1)
                 .thenReturn(answer2);
 
@@ -117,24 +117,9 @@ class GameFactoryTest {
             assertEquals(player2, game2.getPlayer());
             assertEquals(answer2, game2.getAnswer());
             
-            verify(mockApiClient, times(2)).getRandomNums();
+            verify(mockNumberGenerator, times(2)).generateNumbers();
         }
 
-        @Test
-        @DisplayName("should propagate API client exceptions")
-        void shouldPropagateApiClientExceptions() {
-            // Arrange
-            Player testPlayer = new Player("TestPlayer");
-            RuntimeException apiException = new RuntimeException("API failure");
-            when(mockApiClient.getRandomNums()).thenThrow(apiException);
-
-            // Act & Assert
-            RuntimeException thrownException = assertThrows(RuntimeException.class, 
-                () -> gameFactory.createGame(testPlayer));
-            
-            assertEquals("API failure", thrownException.getMessage());
-            verify(mockApiClient, times(1)).getRandomNums();
-        }
     }
 
     @Nested
@@ -147,7 +132,7 @@ class GameFactoryTest {
             // Arrange
             Player testPlayer = new Player("TestPlayer");
             NumCombination mockAnswer = new NumCombination(Arrays.asList(1, 2, 3, 4));
-            when(mockApiClient.getRandomNums()).thenReturn(mockAnswer);
+            when(mockNumberGenerator.generateNumbers()).thenReturn(mockAnswer);
 
             // Act
             Game result = gameFactory.createGame(testPlayer);
@@ -162,7 +147,7 @@ class GameFactoryTest {
             // Arrange
             Player testPlayer = new Player("TestPlayer");
             NumCombination mockAnswer = new NumCombination(Arrays.asList(1, 2, 3, 4));
-            when(mockApiClient.getRandomNums()).thenReturn(mockAnswer);
+            when(mockNumberGenerator.generateNumbers()).thenReturn(mockAnswer);
 
             // Act
             Game result = gameFactory.createGame(testPlayer);
@@ -177,7 +162,7 @@ class GameFactoryTest {
             // Arrange
             Player testPlayer = new Player("TestPlayer");
             NumCombination mockAnswer = new NumCombination(Arrays.asList(1, 2, 3, 4));
-            when(mockApiClient.getRandomNums()).thenReturn(mockAnswer);
+            when(mockNumberGenerator.generateNumbers()).thenReturn(mockAnswer);
 
             // Act
             Game result = gameFactory.createGame(testPlayer);
