@@ -21,7 +21,7 @@ class MainTest {
     @Test
     void mainShouldRunWithoutException() {
         // Arrange - Provide input to exit game immediately
-        System.setIn(new ByteArrayInputStream("3\nn\n".getBytes())); // Exit game, no to play again
+        System.setIn(new ByteArrayInputStream("TestPlayer\n3\nn\n".getBytes())); // Player name, exit game, no to play again
 
         // Act & Assert - Should not throw any exceptions during dependency wiring and startup
         assertDoesNotThrow(() -> Main.main(new String[]{}));
