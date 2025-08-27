@@ -24,8 +24,12 @@ public class UserInterface {
                 return NumCombination.parse(input);
             } catch (IllegalArgumentException e) {
                 System.out.printf("""
-                    Invalid input: %s
-                    Please enter 4 numbers between 0-7, separated by spaces (e.g., '1 2 3 4')
+                    
+                    *** INVALID INPUT ***
+                    %s
+                    
+                    => Please enter 4 numbers between 0-7, separated by spaces (e.g., '1 2 3 4')
+                    
                     """, e.getMessage());
             }
         }
@@ -41,7 +45,7 @@ public class UserInterface {
             } else if (input.equals("n") || input.equals("no")) {
                 return false;
             } else {
-                System.out.println("Please enter 'y' for yes or 'n' for no.");
+                System.out.println("\n--- Please enter 'y' for yes or 'n' for no ---\n");
             }
         }
     }
@@ -61,6 +65,7 @@ public class UserInterface {
     public int displayGameMenu(int remainingAttempts) {
         while (true) {
             System.out.printf("""
+                
                 ========================================
                            MASTERMIND - GAME MENU
                 ========================================
@@ -71,12 +76,12 @@ public class UserInterface {
                 2. Show game history
                 3. Exit game
                 
-                Enter your choice (1-3): """, remainingAttempts);
+                Enter your choice (1-3):\s """, remainingAttempts);
             
             try {
                 return Integer.parseInt(SCANNER.nextLine().trim());
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number.\n");
+                System.out.println("\n*** Invalid input. Please enter a number. ***\n");
             }
         }
     }
