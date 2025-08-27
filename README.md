@@ -11,6 +11,7 @@ A Java-based implementation of the classic Mastermind guessing game with a comma
 - [Testing & CI](#testing--ci)
 - [Technical Implementation Details](#technical-implementation-details)
 - [Critical Design Decisions](#critical-design-decisions)
+- [Planning](https://trello.com/b/6MPl0smI/reach-mastermind)
 
 ---
 
