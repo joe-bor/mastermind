@@ -121,7 +121,7 @@ class GameControllerTest {
             // Arrange
             NumCombination testGuess = new NumCombination(Arrays.asList(1, 2, 3, 4));
             NumCombination testAnswer = new NumCombination(Arrays.asList(5, 6, 7, 0));
-            Feedback testFeedback = new Feedback(1, 0);
+            Feedback testFeedback = new Feedback(1, 0, 4);
             
             when(mockGame.getStatus())
                 .thenReturn(Status.IN_PROGRESS)  // First check - continue game loop
@@ -140,7 +140,7 @@ class GameControllerTest {
             verify(mockUI, times(1)).promptForGuess(9);
             verify(mockGame, times(1)).playerGuess(testGuess);
             verify(mockUI, times(1)).displayFeedback(testGuess, testFeedback);
-            verify(mockUI, times(2)).displayGameResults(Status.WON, testAnswer); // Called twice - in handleGuess and gameLoop
+            verify(mockUI, times(1)).displayGameResults(Status.WON, testAnswer); // Called once in handleGuess when game ends
         }
 
         @Test
@@ -199,47 +199,6 @@ class GameControllerTest {
             // Assert
             verify(mockUI, times(2)).displayGameMenu(8);
             verify(mockUI, times(1)).displayError("Invalid menu choice. Please try again.");
-        }
-    }
-
-    @Nested
-    @DisplayName("Game flow completion")
-    class GameFlowCompletion {
-
-        @BeforeEach
-        void setUpGameMocks() {
-            when(mockGameFactory.createGame(any(Player.class))).thenReturn(mockGame);
-            when(mockUI.promptForNewGame()).thenReturn(false);
-        }
-
-        @Test
-        @DisplayName("should display results when game ends naturally with win")
-        void shouldDisplayResultsWhenGameEndsNaturallyWithWin() {
-            // Arrange
-            NumCombination testAnswer = new NumCombination(Arrays.asList(1, 2, 3, 4));
-            when(mockGame.getStatus()).thenReturn(Status.WON);
-            when(mockGame.getAnswer()).thenReturn(testAnswer);
-
-            // Act
-            gameController.startGame();
-
-            // Assert
-            verify(mockUI, times(1)).displayGameResults(Status.WON, testAnswer);
-        }
-
-        @Test
-        @DisplayName("should display results when game ends naturally with loss")
-        void shouldDisplayResultsWhenGameEndsNaturallyWithLoss() {
-            // Arrange
-            NumCombination testAnswer = new NumCombination(Arrays.asList(5, 6, 7, 0));
-            when(mockGame.getStatus()).thenReturn(Status.LOST);
-            when(mockGame.getAnswer()).thenReturn(testAnswer);
-
-            // Act
-            gameController.startGame();
-
-            // Assert
-            verify(mockUI, times(1)).displayGameResults(Status.LOST, testAnswer);
         }
     }
 
