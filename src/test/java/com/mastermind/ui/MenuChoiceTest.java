@@ -38,10 +38,18 @@ class MenuChoiceTest {
         }
 
         @Test
-        @DisplayName("should have exactly 3 enum values")
-        void shouldHaveExactlyThreeEnumValues() {
+        @DisplayName("should have correct value and description for GET_HINT")
+        void shouldHaveCorrectValueAndDescriptionForGetHint() {
             // Assert
-            assertEquals(3, MenuChoice.values().length);
+            assertEquals(4, MenuChoice.GET_HINT.getValue());
+            assertEquals("Get a hint", MenuChoice.GET_HINT.getDescription());
+        }
+
+        @Test
+        @DisplayName("should have exactly 4 enum values")
+        void shouldHaveExactlyFourEnumValues() {
+            // Assert
+            assertEquals(4, MenuChoice.values().length);
         }
     }
 
@@ -80,10 +88,20 @@ class MenuChoiceTest {
         }
 
         @Test
+        @DisplayName("should return GET_HINT for value 4")
+        void shouldReturnGetHintForValueFour() {
+            // Act
+            MenuChoice result = MenuChoice.fromValue(4);
+
+            // Assert
+            assertEquals(MenuChoice.GET_HINT, result);
+        }
+
+        @Test
         @DisplayName("should return null for invalid positive value")
         void shouldReturnNullForInvalidPositiveValue() {
             // Act & Assert
-            assertNull(MenuChoice.fromValue(4));
+            assertNull(MenuChoice.fromValue(5));
             assertNull(MenuChoice.fromValue(99));
         }
 

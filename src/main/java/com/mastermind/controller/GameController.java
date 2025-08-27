@@ -44,16 +44,21 @@ public class GameController {
 
     private void gameLoop(Game game) {
         while (game.getStatus() == Status.IN_PROGRESS) {
-            int userChoice = ui.displayGameMenu(game.getRemainingAttempts(), game.getPlayer().getName());
-            MenuChoice choice = MenuChoice.fromValue(userChoice);
+            int userChoice =
+                    ui.displayGameMenu(
+                            game.getPlayer().getName(),
+                            game.getRemainingAttempts(),
+                            MenuChoice.values().length
+                    );
             
-            switch (choice) {
+            switch (MenuChoice.fromValue(userChoice)) {
                 case MAKE_GUESS -> handleGuess(game);
                 case SHOW_HISTORY -> ui.displayGameHistory(game.getHistory());
                 case EXIT_GAME -> {
                     System.out.println("Game ended by player.");
                     return;
                 }
+                case GET_HINT -> ui.displayHint(game.getHint());
                 case null -> ui.displayError("Invalid menu choice. Please try again.");
             }
         }

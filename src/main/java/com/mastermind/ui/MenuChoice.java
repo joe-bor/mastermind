@@ -10,7 +10,8 @@ import java.util.Arrays;
 public enum MenuChoice {
     MAKE_GUESS(1, "Make a guess"),
     SHOW_HISTORY(2, "Show game history"),
-    EXIT_GAME(3, "Exit game");
+    EXIT_GAME(3, "Exit game"),
+    GET_HINT(4, "Get a hint");
 
     private final int value;
     private final String description;
