@@ -62,7 +62,7 @@ class GameFactoryTest {
             // Arrange
             Player testPlayer = new Player("TestPlayer");
             NumCombination expectedAnswer = new NumCombination(Arrays.asList(1, 2, 3, 4));
-            when(mockNumberGenerator.generateNumbers()).thenReturn(expectedAnswer);
+            when(mockNumberGenerator.generateNumbers(anyInt(), anyInt())).thenReturn(expectedAnswer);
 
             // Act
             Game result = gameFactory.createGame(testPlayer);
@@ -83,13 +83,13 @@ class GameFactoryTest {
             // Arrange
             Player testPlayer = new Player("TestPlayer");
             NumCombination mockAnswer = new NumCombination(Arrays.asList(0, 1, 2, 3));
-            when(mockNumberGenerator.generateNumbers()).thenReturn(mockAnswer);
+            when(mockNumberGenerator.generateNumbers(anyInt(), anyInt())).thenReturn(mockAnswer);
 
             // Act
             gameFactory.createGame(testPlayer);
 
             // Assert
-            verify(mockNumberGenerator, times(1)).generateNumbers();
+            verify(mockNumberGenerator, times(1)).generateNumbers(anyInt(), anyInt());
         }
 
         @Test
@@ -102,7 +102,7 @@ class GameFactoryTest {
             NumCombination answer1 = new NumCombination(Arrays.asList(1, 2, 3, 4));
             NumCombination answer2 = new NumCombination(Arrays.asList(5, 6, 7, 0));
             
-            when(mockNumberGenerator.generateNumbers())
+            when(mockNumberGenerator.generateNumbers(anyInt(), anyInt()))
                 .thenReturn(answer1)
                 .thenReturn(answer2);
 
@@ -117,7 +117,7 @@ class GameFactoryTest {
             assertEquals(player2, game2.getPlayer());
             assertEquals(answer2, game2.getAnswer());
             
-            verify(mockNumberGenerator, times(2)).generateNumbers();
+            verify(mockNumberGenerator, times(2)).generateNumbers(anyInt(), anyInt());
         }
 
     }
@@ -132,7 +132,7 @@ class GameFactoryTest {
             // Arrange
             Player testPlayer = new Player("TestPlayer");
             NumCombination mockAnswer = new NumCombination(Arrays.asList(1, 2, 3, 4));
-            when(mockNumberGenerator.generateNumbers()).thenReturn(mockAnswer);
+            when(mockNumberGenerator.generateNumbers(anyInt(), anyInt())).thenReturn(mockAnswer);
 
             // Act
             Game result = gameFactory.createGame(testPlayer);
@@ -147,7 +147,7 @@ class GameFactoryTest {
             // Arrange
             Player testPlayer = new Player("TestPlayer");
             NumCombination mockAnswer = new NumCombination(Arrays.asList(1, 2, 3, 4));
-            when(mockNumberGenerator.generateNumbers()).thenReturn(mockAnswer);
+            when(mockNumberGenerator.generateNumbers(anyInt(), anyInt())).thenReturn(mockAnswer);
 
             // Act
             Game result = gameFactory.createGame(testPlayer);
@@ -162,7 +162,7 @@ class GameFactoryTest {
             // Arrange
             Player testPlayer = new Player("TestPlayer");
             NumCombination mockAnswer = new NumCombination(Arrays.asList(1, 2, 3, 4));
-            when(mockNumberGenerator.generateNumbers()).thenReturn(mockAnswer);
+            when(mockNumberGenerator.generateNumbers(anyInt(), anyInt())).thenReturn(mockAnswer);
 
             // Act
             Game result = gameFactory.createGame(testPlayer);

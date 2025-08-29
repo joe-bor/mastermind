@@ -6,6 +6,7 @@ import com.mastermind.models.NumCombination;
 import com.mastermind.models.Status;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 /**
@@ -15,22 +16,22 @@ public class UserInterface {
     private static final Scanner SCANNER = new Scanner(System.in);
 
     // -- Input --
-    public NumCombination promptForGuess(int remainingAttempts) {
+    public NumCombination promptForGuess(int remainingAttempts, int expectedSize, int minValue, int maxValue) {
         while (true) {
             System.out.printf("Enter your guess (%d attempts remaining): ", remainingAttempts);
             String input = SCANNER.nextLine().trim();
 
             try {
-                return NumCombination.parse(input);
+                return NumCombination.parse(input, expectedSize, minValue, maxValue);
             } catch (IllegalArgumentException e) {
                 System.out.printf("""
                     
                     *** INVALID INPUT ***
                     %s
                     
-                    => Please enter 4 numbers between 0-7, separated by spaces (e.g., '1 2 3 4')
+                    => Please enter %d numbers between %d-%d, separated by spaces
                     
-                    """, e.getMessage());
+                    """, e.getMessage(), expectedSize, minValue, maxValue);
             }
         }
     }
@@ -61,13 +62,33 @@ public class UserInterface {
         return name;
     }
 
+    public int promptForDifficultyLevel() {
+        while (true) {
+            System.out.print("""
+                    -----------------------------
+                    Pick Difficulty Level
+                    -----------------------------
+                    1. Easy: 3 digits, numbers 0-5
+                    2. Normal: 4 digits, numbers 0-7
+                    3. Hard: 5 digits, numbers 0-9
+                    
+                    Enter your choice (1-3):\s """);
+
+            try {
+                return Integer.parseInt(SCANNER.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("\n*** Invalid input. Please enter a number. ***\n");
+            }
+        }
+    }
+
 
     // -- Display --
     public void displayWelcomeMessage() {
         System.out.print("""
             ***** Welcome to Mastermind-CLI *****
-            - Guess the secret 4-number combination!
-            - Numbers range from 0-7, duplicates allowed.
+            - Guess the secret number combination!
+            - Choose your difficulty level to determine game constraints.
             - You have 10 attempts to crack the code.
             
             """);
@@ -162,7 +183,9 @@ public class UserInterface {
         System.out.println("Error: " + message);
     }
 
-    public void displayHint(String numFromAnswer) {
-        System.out.println("The combination contains a number " + numFromAnswer);
+    public void displayHint(Optional<String> numFromAnswer) {
+        numFromAnswer.ifPresentOrElse(
+                s -> System.out.println("The combination contains a number " + s),
+                () -> System.out.println("No more hints left"));
     }
 }

@@ -134,7 +134,7 @@ class GameTest {
             Game game = new Game(testPlayer, testAnswer);
 
             // Act & Assert
-            assertThrows(IllegalArgumentException.class, () -> game.playerGuess(testGuess));
+            assertThrows(IllegalStateException.class, () -> game.playerGuess(testGuess));
         }
 
         @Test
@@ -146,7 +146,7 @@ class GameTest {
             game.playerGuess(testAnswer); // Win the game
 
             // Act & Assert
-            assertThrows(IllegalArgumentException.class, () -> game.playerGuess(testGuess));
+            assertThrows(IllegalStateException.class, () -> game.playerGuess(testGuess));
         }
 
         @Test
@@ -163,7 +163,7 @@ class GameTest {
             }
 
             // Act & Assert
-            assertThrows(IllegalArgumentException.class, () -> game.playerGuess(testGuess));
+            assertThrows(IllegalStateException.class, () -> game.playerGuess(testGuess));
         }
 
         @Test

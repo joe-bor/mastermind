@@ -59,7 +59,7 @@ class RandomNumberGeneratorTest {
         void shouldReturnApiResultOnFirstAttemptSuccess() {
             // Arrange
             NumCombination expectedAnswer = new NumCombination(Arrays.asList(1, 2, 3, 4));
-            when(mockApiClient.getRandomNums()).thenReturn(expectedAnswer);
+            when(mockApiClient.getRandomNums(anyInt(), anyInt())).thenReturn(expectedAnswer);
 
             // Act
             NumCombination result = generator.generateNumbers();
@@ -67,7 +67,7 @@ class RandomNumberGeneratorTest {
             // Assert
             assertNotNull(result);
             assertEquals(expectedAnswer, result);
-            verify(mockApiClient, times(1)).getRandomNums();
+            verify(mockApiClient, times(1)).getRandomNums(anyInt(), anyInt());
         }
 
         @Test
@@ -75,7 +75,7 @@ class RandomNumberGeneratorTest {
         void shouldReturnApiResultWithDifferentNumberCombinations() {
             // Arrange
             NumCombination expectedAnswer = new NumCombination(Arrays.asList(7, 0, 5, 2));
-            when(mockApiClient.getRandomNums()).thenReturn(expectedAnswer);
+            when(mockApiClient.getRandomNums(anyInt(), anyInt())).thenReturn(expectedAnswer);
 
             // Act
             NumCombination result = generator.generateNumbers();
@@ -96,7 +96,7 @@ class RandomNumberGeneratorTest {
         void shouldSucceedOnFirstRetryAttempt() {
             // Arrange
             NumCombination expectedAnswer = new NumCombination(Arrays.asList(3, 4, 5, 6));
-            when(mockApiClient.getRandomNums())
+            when(mockApiClient.getRandomNums(anyInt(), anyInt()))
                     .thenThrow(new RandomNumberApiException("First attempt fails"))
                     .thenReturn(expectedAnswer); // Second attempt succeeds
 
@@ -106,7 +106,7 @@ class RandomNumberGeneratorTest {
             // Assert
             assertNotNull(result);
             assertEquals(expectedAnswer, result);
-            verify(mockApiClient, times(2)).getRandomNums();
+            verify(mockApiClient, times(2)).getRandomNums(anyInt(), anyInt());
         }
 
         @Test
@@ -114,7 +114,7 @@ class RandomNumberGeneratorTest {
         void shouldSucceedOnSecondRetryAttempt() {
             // Arrange
             NumCombination expectedAnswer = new NumCombination(Arrays.asList(0, 1, 7, 6));
-            when(mockApiClient.getRandomNums())
+            when(mockApiClient.getRandomNums(anyInt(), anyInt()))
                     .thenThrow(new RandomNumberApiException("First attempt fails"))
                     .thenThrow(new RandomNumberApiException("Second attempt fails"))
                     .thenReturn(expectedAnswer); // Third attempt succeeds
@@ -125,7 +125,7 @@ class RandomNumberGeneratorTest {
             // Assert
             assertNotNull(result);
             assertEquals(expectedAnswer, result);
-            verify(mockApiClient, times(3)).getRandomNums();
+            verify(mockApiClient, times(3)).getRandomNums(anyInt(), anyInt());
         }
     }
 
@@ -137,7 +137,7 @@ class RandomNumberGeneratorTest {
         @DisplayName("should fall back to local generation when all API attempts fail")
         void shouldFallBackToLocalGenerationWhenAllApiAttemptsFail() {
             // Arrange
-            when(mockApiClient.getRandomNums()).thenThrow(new RandomNumberApiException("API always fails"));
+            when(mockApiClient.getRandomNums(anyInt(), anyInt())).thenThrow(new RandomNumberApiException("API always fails"));
 
             // Act
             NumCombination result = generator.generateNumbers();
@@ -154,14 +154,14 @@ class RandomNumberGeneratorTest {
             }
             
             // Verify all retry attempts were made
-            verify(mockApiClient, times(3)).getRandomNums();
+            verify(mockApiClient, times(3)).getRandomNums(anyInt(), anyInt());
         }
 
         @Test
         @DisplayName("should generate different fallback numbers on multiple calls")
         void shouldGenerateDifferentFallbackNumbersOnMultipleCalls() {
             // Arrange
-            when(mockApiClient.getRandomNums()).thenThrow(new RandomNumberApiException("API always fails"));
+            when(mockApiClient.getRandomNums(anyInt(), anyInt())).thenThrow(new RandomNumberApiException("API always fails"));
 
             // Act - Generate multiple sets
             NumCombination result1 = generator.generateNumbers();
@@ -183,14 +183,14 @@ class RandomNumberGeneratorTest {
             assertFalse(allSame, "Generated numbers should have some variation");
             
             // Verify API was called 3 times for each generation (3 generations × 3 attempts each)
-            verify(mockApiClient, times(9)).getRandomNums();
+            verify(mockApiClient, times(9)).getRandomNums(anyInt(), anyInt());
         }
 
         @Test
         @DisplayName("should handle thread interruption during retry")
         void shouldHandleThreadInterruptionDuringRetry() {
             // Arrange
-            when(mockApiClient.getRandomNums()).thenThrow(new RandomNumberApiException("API fails"));
+            when(mockApiClient.getRandomNums(anyInt(), anyInt())).thenThrow(new RandomNumberApiException("API fails"));
             
             // Interrupt the current thread to simulate interruption during sleep
             Thread.currentThread().interrupt();
@@ -209,7 +209,7 @@ class RandomNumberGeneratorTest {
             }
             
             // Should have tried at least once before interruption caused fallback
-            verify(mockApiClient, atLeast(1)).getRandomNums();
+            verify(mockApiClient, atLeast(1)).getRandomNums(anyInt(), anyInt());
             
             // Clean up the interrupted status
             assertTrue(Thread.interrupted(), "Thread should have been interrupted");

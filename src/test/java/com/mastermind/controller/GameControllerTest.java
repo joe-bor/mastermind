@@ -1,5 +1,6 @@
 package com.mastermind.controller;
 
+import com.mastermind.models.Difficulty;
 import com.mastermind.models.Feedback;
 import com.mastermind.models.Game;
 import com.mastermind.models.NumCombination;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,7 +77,8 @@ class GameControllerTest {
         void shouldDisplayWelcomeMessageAndCreateGameOnStartup() {
             // Arrange
             when(mockUI.promptForPlayerName()).thenReturn("TestPlayer");
-            when(mockGameFactory.createGame(any(Player.class))).thenReturn(mockGame);
+            when(mockUI.promptForDifficultyLevel()).thenReturn(2); // NORMAL difficulty
+            when(mockGameFactory.createGame(any(Player.class), any())).thenReturn(mockGame);
             when(mockGame.getStatus()).thenReturn(Status.IN_PROGRESS);
             when(mockGame.getPlayer()).thenReturn(new Player("TestPlayer"));
             when(mockUI.displayGameMenu(anyString(), anyInt(), anyInt())).thenReturn(3); // Exit immediately
@@ -87,7 +90,7 @@ class GameControllerTest {
             // Assert
             verify(mockUI, times(1)).displayWelcomeMessage();
             verify(mockUI, times(1)).promptForPlayerName();
-            verify(mockGameFactory, times(1)).createGame(any(Player.class));
+            verify(mockGameFactory, times(1)).createGame(any(Player.class), any());
             verify(mockGame, times(1)).start();
         }
 
@@ -96,8 +99,9 @@ class GameControllerTest {
         void shouldHandleGameCreationFailureGracefully() {
             // Arrange
             when(mockUI.promptForPlayerName()).thenReturn("TestPlayer");
+            when(mockUI.promptForDifficultyLevel()).thenReturn(2); // NORMAL difficulty
             RuntimeException gameCreationError = new RuntimeException("API failure");
-            when(mockGameFactory.createGame(any(Player.class))).thenThrow(gameCreationError);
+            when(mockGameFactory.createGame(any(Player.class), any())).thenThrow(gameCreationError);
             when(mockUI.promptForNewGame()).thenReturn(false);
 
             // Act
@@ -117,8 +121,10 @@ class GameControllerTest {
         @BeforeEach
         void setUpGameMocks() {
             when(mockUI.promptForPlayerName()).thenReturn("TestPlayer");
-            when(mockGameFactory.createGame(any(Player.class))).thenReturn(mockGame);
+            when(mockUI.promptForDifficultyLevel()).thenReturn(2); // NORMAL difficulty
+            when(mockGameFactory.createGame(any(Player.class), any())).thenReturn(mockGame);
             when(mockGame.getPlayer()).thenReturn(new Player("TestPlayer"));
+            when(mockGame.getDifficulty()).thenReturn(Difficulty.NORMAL);
             when(mockUI.promptForNewGame()).thenReturn(false);
         }
 
@@ -136,7 +142,7 @@ class GameControllerTest {
             when(mockGame.getRemainingAttempts()).thenReturn(9);
             when(mockGame.getAnswer()).thenReturn(testAnswer);
             when(mockUI.displayGameMenu(eq("TestPlayer"), eq(9), anyInt())).thenReturn(1); // MAKE_GUESS choice
-            when(mockUI.promptForGuess(9)).thenReturn(testGuess);
+            when(mockUI.promptForGuess(9, 4, 0, 7)).thenReturn(testGuess);
             when(mockGame.playerGuess(testGuess)).thenReturn(testFeedback);
 
             // Act
@@ -144,7 +150,7 @@ class GameControllerTest {
 
             // Assert
             verify(mockUI, times(1)).displayGameMenu(eq("TestPlayer"), eq(9), anyInt());
-            verify(mockUI, times(1)).promptForGuess(9);
+            verify(mockUI, times(1)).promptForGuess(9, 4, 0, 7);
             verify(mockGame, times(1)).playerGuess(testGuess);
             verify(mockUI, times(1)).displayFeedback(testGuess, testFeedback);
             verify(mockUI, times(1)).displayGameResults(Status.WON, testAnswer, "TestPlayer"); // Called once in handleGuess when game ends
@@ -217,7 +223,7 @@ class GameControllerTest {
                 .thenReturn(Status.LOST);        // Second check - end game
             when(mockGame.getRemainingAttempts()).thenReturn(6);
             when(mockGame.getAnswer()).thenReturn(new NumCombination(Arrays.asList(1, 2, 3, 4)));
-            when(mockGame.getHint()).thenReturn("3");
+            when(mockGame.getHint()).thenReturn(Optional.of("3"));
             when(mockUI.displayGameMenu(eq("TestPlayer"), eq(6), anyInt())).thenReturn(4); // GET_HINT choice
 
             // Act
@@ -226,7 +232,7 @@ class GameControllerTest {
             // Assert
             verify(mockUI, times(1)).displayGameMenu(eq("TestPlayer"), eq(6), anyInt());
             verify(mockGame, times(1)).getHint();
-            verify(mockUI, times(1)).displayHint("3");
+            verify(mockUI, times(1)).displayHint(Optional.of("3"));
         }
     }
 
@@ -245,10 +251,12 @@ class GameControllerTest {
                 .thenReturn("Player1")
                 .thenReturn("Player2");
             
+            when(mockUI.promptForDifficultyLevel()).thenReturn(2); // NORMAL difficulty for both games
+            
             when(firstGame.getPlayer()).thenReturn(new Player("Player1"));
             when(secondGame.getPlayer()).thenReturn(new Player("Player2"));
             
-            when(mockGameFactory.createGame(any(Player.class)))
+            when(mockGameFactory.createGame(any(Player.class), any()))
                 .thenReturn(firstGame)
                 .thenReturn(secondGame);
             
@@ -267,7 +275,7 @@ class GameControllerTest {
 
             // Assert
             verify(mockUI, times(1)).displayWelcomeMessage(); // Only once at startup
-            verify(mockGameFactory, times(2)).createGame(any(Player.class)); // Two games created
+            verify(mockGameFactory, times(2)).createGame(any(Player.class), any()); // Two games created
             verify(firstGame, times(1)).start();
             verify(secondGame, times(1)).start();
             verify(mockUI, times(2)).promptForNewGame(); // Asked twice
@@ -278,7 +286,8 @@ class GameControllerTest {
         void shouldStopWhenUserDeclinesToPlayAgain() {
             // Arrange
             when(mockUI.promptForPlayerName()).thenReturn("TestPlayer");
-            when(mockGameFactory.createGame(any(Player.class))).thenReturn(mockGame);
+            when(mockUI.promptForDifficultyLevel()).thenReturn(2); // NORMAL difficulty
+            when(mockGameFactory.createGame(any(Player.class), any())).thenReturn(mockGame);
             when(mockGame.getStatus()).thenReturn(Status.WON);
             when(mockGame.getAnswer()).thenReturn(new NumCombination(Arrays.asList(1, 2, 3, 4)));
             when(mockGame.getPlayer()).thenReturn(new Player("TestPlayer"));
@@ -289,7 +298,7 @@ class GameControllerTest {
 
             // Assert
             verify(mockUI, times(1)).promptForNewGame();
-            verify(mockGameFactory, times(1)).createGame(any(Player.class)); // Only one game
+            verify(mockGameFactory, times(1)).createGame(any(Player.class), any()); // Only one game
         }
     }
 }

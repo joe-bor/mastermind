@@ -1,10 +1,6 @@
 package com.mastermind.controller;
 
-import com.mastermind.models.Feedback;
-import com.mastermind.models.Game;
-import com.mastermind.models.NumCombination;
-import com.mastermind.models.Player;
-import com.mastermind.models.Status;
+import com.mastermind.models.*;
 import com.mastermind.services.GameFactory;
 import com.mastermind.ui.MenuChoice;
 import com.mastermind.ui.UserInterface;
@@ -25,7 +21,11 @@ public class GameController {
         boolean playAgain = true;
         while (playAgain) {
             try {
-                Game game = createNewGame();
+                Game game = switch (Difficulty.fromValue(ui.promptForDifficultyLevel())){
+                    case EASY ->createNewGame(Difficulty.EASY);
+                    case NORMAL -> createNewGame();
+                    case HARD -> createNewGame(Difficulty.HARD);
+                };
                 game.start();
                 gameLoop(game);
                 
@@ -38,8 +38,12 @@ public class GameController {
     }
 
     private Game createNewGame() {
+        return createNewGame(Difficulty.NORMAL);
+    }
+
+    private Game createNewGame(Difficulty difficulty) {
         Player player = new Player(ui.promptForPlayerName());
-        return gameFactory.createGame(player);
+        return gameFactory.createGame(player, difficulty);
     }
 
     private void gameLoop(Game game) {
@@ -65,7 +69,13 @@ public class GameController {
     }
 
     private void handleGuess(Game game) {
-        NumCombination guess = ui.promptForGuess(game.getRemainingAttempts());
+        Difficulty difficulty = game.getDifficulty();
+        NumCombination guess = ui.promptForGuess(
+                game.getRemainingAttempts(),
+                difficulty.getCombinationSize(),
+                0, // min value is always 0
+                difficulty.getMaxRange()
+        );
         Feedback feedback = game.playerGuess(guess);
         ui.displayFeedback(guess, feedback);
         
