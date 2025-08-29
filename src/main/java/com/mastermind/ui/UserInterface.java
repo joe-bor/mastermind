@@ -71,8 +71,7 @@ public class UserInterface {
                     2. Normal: 4 digits, numbers 0-7
                     3. Hard: 5 digits, numbers 0-9
                     
-                    Enter your choice (1-3):\s
-                    """);
+                    Enter your choice (1-3):\s """);
 
             try {
                 return Integer.parseInt(SCANNER.nextLine().trim());

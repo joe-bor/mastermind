@@ -44,8 +44,8 @@ public class RandomNumberApiClient {
 
             // Check HTTP status code first
             if (response.statusCode() == 200) {
-                // Success - parse the numbers
-                return parseSuccessResponse(response.body());
+                // Success - parse the numbers with constraints
+                return parseSuccessResponse(response.body(), size, max);
             } else if (response.statusCode() == 503) {
                 // Service unavailable - handle error response
                 throw new RandomNumberApiException("Random.org API error: " + extractErrorMessage(response.body()));
@@ -59,7 +59,7 @@ public class RandomNumberApiClient {
         }
     }
 
-    private NumCombination parseSuccessResponse(String responseBody) {
+    private NumCombination parseSuccessResponse(String responseBody, int size, int max) {
         // Split body on every new line (Ref: https://www.random.org/clients/http/api/)
         String[] lines = responseBody
                 .trim()
@@ -70,7 +70,7 @@ public class RandomNumberApiClient {
                 .map(Integer::parseInt)
                 .toList();
 
-        return new NumCombination(integerList);
+        return new NumCombination(integerList, size, 0, max);
     }
     
     private String extractErrorMessage(String responseBody) {
