@@ -1,5 +1,6 @@
 package com.mastermind.controller;
 
+import com.mastermind.models.Difficulty;
 import com.mastermind.models.Feedback;
 import com.mastermind.models.Game;
 import com.mastermind.models.NumCombination;
@@ -117,8 +118,10 @@ class GameControllerTest {
         @BeforeEach
         void setUpGameMocks() {
             when(mockUI.promptForPlayerName()).thenReturn("TestPlayer");
-            when(mockGameFactory.createGame(any(Player.class))).thenReturn(mockGame);
+            when(mockUI.promptForDifficultyLevel()).thenReturn(2); // NORMAL difficulty
+            when(mockGameFactory.createGame(any(Player.class), any())).thenReturn(mockGame);
             when(mockGame.getPlayer()).thenReturn(new Player("TestPlayer"));
+            when(mockGame.getDifficulty()).thenReturn(Difficulty.NORMAL);
             when(mockUI.promptForNewGame()).thenReturn(false);
         }
 
@@ -136,7 +139,7 @@ class GameControllerTest {
             when(mockGame.getRemainingAttempts()).thenReturn(9);
             when(mockGame.getAnswer()).thenReturn(testAnswer);
             when(mockUI.displayGameMenu(eq("TestPlayer"), eq(9), anyInt())).thenReturn(1); // MAKE_GUESS choice
-            when(mockUI.promptForGuess(9)).thenReturn(testGuess);
+            when(mockUI.promptForGuess(9, 4, 0, 7)).thenReturn(testGuess);
             when(mockGame.playerGuess(testGuess)).thenReturn(testFeedback);
 
             // Act
@@ -144,7 +147,7 @@ class GameControllerTest {
 
             // Assert
             verify(mockUI, times(1)).displayGameMenu(eq("TestPlayer"), eq(9), anyInt());
-            verify(mockUI, times(1)).promptForGuess(9);
+            verify(mockUI, times(1)).promptForGuess(9, 4, 0, 7);
             verify(mockGame, times(1)).playerGuess(testGuess);
             verify(mockUI, times(1)).displayFeedback(testGuess, testFeedback);
             verify(mockUI, times(1)).displayGameResults(Status.WON, testAnswer, "TestPlayer"); // Called once in handleGuess when game ends
