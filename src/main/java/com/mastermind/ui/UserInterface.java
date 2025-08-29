@@ -6,6 +6,7 @@ import com.mastermind.models.NumCombination;
 import com.mastermind.models.Status;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 /**
@@ -182,7 +183,9 @@ public class UserInterface {
         System.out.println("Error: " + message);
     }
 
-    public void displayHint(String numFromAnswer) {
-        System.out.println("The combination contains a number " + numFromAnswer);
+    public void displayHint(Optional<String> numFromAnswer) {
+        numFromAnswer.ifPresentOrElse(
+                s -> System.out.println("The combination contains a number " + s),
+                () -> System.out.println("No more hints left"));
     }
 }

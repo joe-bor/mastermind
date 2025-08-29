@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 /**
@@ -106,17 +107,16 @@ public class Game {
         return this.maxAttempts - this.guesses.size();
     }
 
-    public String getHint() {
+    public Optional<String> getHint() {
         if (this.hintCount == 0){
-            return "No more hints left";
+            return Optional.empty();
         }
 
-        int size = this.answer.getNumbers().size();
-        Random random = new Random();
         this.hintCount--;
 
-        return this.answer.getNumbers()
-                .get(random.nextInt(size))
-                .toString();
+        int size = this.answer.getNumbers().size();
+        int randomIndex = new Random().nextInt(size);
+
+        return Optional.of(this.answer.getNumbers().get(randomIndex).toString());
     }
 }

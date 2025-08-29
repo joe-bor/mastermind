@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -222,7 +223,7 @@ class GameControllerTest {
                 .thenReturn(Status.LOST);        // Second check - end game
             when(mockGame.getRemainingAttempts()).thenReturn(6);
             when(mockGame.getAnswer()).thenReturn(new NumCombination(Arrays.asList(1, 2, 3, 4)));
-            when(mockGame.getHint()).thenReturn("3");
+            when(mockGame.getHint()).thenReturn(Optional.of("3"));
             when(mockUI.displayGameMenu(eq("TestPlayer"), eq(6), anyInt())).thenReturn(4); // GET_HINT choice
 
             // Act
@@ -231,7 +232,7 @@ class GameControllerTest {
             // Assert
             verify(mockUI, times(1)).displayGameMenu(eq("TestPlayer"), eq(6), anyInt());
             verify(mockGame, times(1)).getHint();
-            verify(mockUI, times(1)).displayHint("3");
+            verify(mockUI, times(1)).displayHint(Optional.of("3"));
         }
     }
 
