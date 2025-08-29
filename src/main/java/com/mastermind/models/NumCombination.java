@@ -1,5 +1,6 @@
 package com.mastermind.models;
 
+import com.mastermind.config.GameConfig;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -13,17 +14,13 @@ import java.util.regex.Pattern;
  */
 @Data
 public class NumCombination {
-    public static final int DEFAULT_SIZE = 4;
-    public static final int DEFAULT_MIN = 0;
-    public static final int DEFAULT_MAX = 7;
-
     private final List<Integer> numbers;
     private final int expectedSize;
     private final int minNum;
     private final int maxNum;
 
     public NumCombination(List<Integer> numbers) {
-        this(numbers, DEFAULT_SIZE, DEFAULT_MIN, DEFAULT_MAX);
+        this(numbers, GameConfig.DEFAULT_ANSWER_SIZE, GameConfig.DEFAULT_MIN_VALUE, GameConfig.DEFAULT_MAX_VALUE);
     }
 
     public NumCombination(List<Integer> numbers, int expectedSize, int minNum, int maxNum) {
@@ -48,6 +45,20 @@ public class NumCombination {
     }
 
     public static NumCombination parse(String input) {
+        return parse(input, GameConfig.DEFAULT_ANSWER_SIZE, GameConfig.DEFAULT_MIN_VALUE, GameConfig.DEFAULT_MAX_VALUE);
+    }
+
+    /**
+     * Parses a string input into a NumCombination with specified constraints.
+     * 
+     * @param input the string to parse (e.g., "1 2 3 4")
+     * @param expectedSize the required number of digits
+     * @param min the minimum allowed value (inclusive)
+     * @param max the maximum allowed value (inclusive)
+     * @return a new NumCombination instance
+     * @throws IllegalArgumentException if input is invalid or doesn't meet constraints
+     */
+    public static NumCombination parse(String input, int expectedSize, int min, int max) {
         if (input == null) {
             throw new IllegalArgumentException("Input is null");
         }
@@ -56,7 +67,6 @@ public class NumCombination {
         if (cleanedInput.isBlank()) {
             throw new IllegalArgumentException("Cleaned input is blank");
         }
-
 
         String[] cleanedStrings = cleanedInput.split(Pattern.quote(" "));
 
@@ -72,7 +82,7 @@ public class NumCombination {
             }
         }
 
-        return new NumCombination(numbers);
+        return new NumCombination(numbers, expectedSize, min, max);
     }
 
     @Override
