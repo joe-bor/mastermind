@@ -1,5 +1,6 @@
 package com.mastermind.services;
 
+import com.mastermind.config.GameConfig;
 import com.mastermind.models.NumCombination;
 
 import java.io.IOException;
@@ -13,7 +14,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class RandomNumberApiClient {
-    private static final String INTEGER_GEN_URI = "https://www.random.org/integers/?num=4&min=0&max=7&col=1&base=10&format=plain&rnd=new";
+    private static final String INTEGER_GEN_URI = "https://www.random.org/integers/?num=%d&min=0&max=%d&col=1&base=10&format=plain&rnd=new";
 
     private final HttpClient client;
 
@@ -26,15 +27,21 @@ public class RandomNumberApiClient {
     }
 
     public NumCombination getRandomNums() throws RandomNumberApiException {
+        return getRandomNums(GameConfig.DEFAULT_ANSWER_SIZE, GameConfig.DEFAULT_MAX_VALUE);
+    }
+
+    public NumCombination getRandomNums(int size, int max) throws RandomNumberApiException {
+        String formattedString = INTEGER_GEN_URI.formatted(size, max);
+
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(INTEGER_GEN_URI))
+                .uri(URI.create(formattedString))
                 .GET()
                 .timeout(Duration.ofSeconds(10))
                 .build();
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            
+
             // Check HTTP status code first
             if (response.statusCode() == 200) {
                 // Success - parse the numbers
@@ -51,7 +58,7 @@ public class RandomNumberApiClient {
             throw new RandomNumberApiException("Network error while contacting Random.org API", e);
         }
     }
-    
+
     private NumCombination parseSuccessResponse(String responseBody) {
         // Split body on every new line (Ref: https://www.random.org/clients/http/api/)
         String[] lines = responseBody

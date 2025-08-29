@@ -14,4 +14,13 @@ public interface NumberGenerator {
      * @return A valid NumCombination suitable for the game
      */
     NumCombination generateNumbers();
+
+    /**
+     * Generates a NumCombination with specified size and range constraints.
+     * 
+     * @param size the number of digits to generate
+     * @param maxRange the maximum value (inclusive) for each digit
+     * @return a valid NumCombination with the specified constraints
+     */
+    NumCombination generateNumbers(int size, int maxRange);
 }
