@@ -61,6 +61,27 @@ public class UserInterface {
         return name;
     }
 
+    public int promptForDifficultyLevel() {
+        while (true) {
+            System.out.print("""
+                    -----------------------------
+                    Pick Difficulty Level
+                    -----------------------------
+                    1. Easy:
+                    2. Normal:
+                    3. Hard
+                    
+                    Enter your choice (1-3):\s
+                    """);
+
+            try {
+                return Integer.parseInt(SCANNER.nextLine().trim());
+            } catch (NumberFormatException e) {
+                System.out.println("\n*** Invalid input. Please enter a number. ***\n");
+            }
+        }
+    }
+
 
     // -- Display --
     public void displayWelcomeMessage() {
