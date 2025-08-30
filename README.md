@@ -1,16 +1,16 @@
 # Mastermind CLI Game
 
-A Java-based implementation of the classic Mastermind guessing game with a command-line interface. Players attempt to crack a secret 4-number combination within 10 attempts, receiving strategic feedback after each guess. The game integrates with Random.org's [API](https://www.random.org/clients/http/api/) for truly random number generation and includes comprehensive error handling with local fallback.
+A Java-based implementation of the classic Mastermind guessing game with a command-line interface. Players choose from three difficulty levels and attempt to crack secret number combinations within 10 attempts, receiving strategic feedback and optional hints after each guess. The game integrates with Random.org's [API](https://www.random.org/clients/http/api/) for truly random number generation and includes comprehensive error handling with local fallback.
 
 ## Table of Contents
 - [Demo / TL;DR](#demo--tldr)
 - [Quick Start](#quick-start)
 - [How to Play](#how-to-play)
 - [Architecture Overview](#architecture-overview)
-- [Extensions & Features](#extensions--features)
+- [UML Diagram](#uml-diagram)
+- [Key Features](#key-features)
 - [Testing & CI](#testing--ci)
-- [Technical Implementation Details](#technical-implementation-details)
-- [Critical Design Decisions](#critical-design-decisions)
+- [Design Choices](#design-choices)
 - [Planning](https://trello.com/b/6MPl0smI/reach-mastermind)
 
 ---
@@ -60,14 +60,22 @@ java -cp build/classes/java/main com.mastermind.Main
 
 ## How to Play
 
-* The secret is **4 numbers** in the range `0` to `7` (inclusive). Duplicates are allowed.
-* You have **10 attempts** to guess the secret.
-* Enter guesses as **four numbers separated by spaces** (example: `1 2 3 4`).
-* After each guess you receive feedback:
+**Choose Your Difficulty:**
 
-    * `All correct` — all digits match in correct positions (you win).
-    * `All incorrect` — no digits match.
-    * `X correct numbers, and Y correct location` — `X` digits appear in the secret (regardless of position), and `Y` of them are in the exact positions.
+| Difficulty | Numbers | Range | Description |
+|------------|---------|-------|-------------|
+| **EASY** | 3 | `0-5` | Beginner-friendly |
+| **NORMAL** | 4 | `0-7` | Classic Mastermind |
+| **HARD** | 5 | `0-9` | Advanced challenge |
+
+**Game Rules:**
+* You have **10 attempts** to guess the secret combination
+* Enter guesses as **numbers separated by spaces** (example: `1 2 3 4`)
+* **Hint System** — Request hints to reveal one correct digit and position
+* After each guess you receive feedback:
+    * `All correct` — all digits match in correct positions (you win)
+    * `All incorrect` — no digits match
+    * `X correct numbers, and Y correct location` — `X` digits appear in the secret (regardless of position), and `Y` of them are in the exact positions
 
 **Example Gameplay:**
 
@@ -81,8 +89,9 @@ Choose an option:
 1. Make a guess
 2. Show game history
 3. Exit game
+4. Get a hint
 
-Enter your choice (1-3): 1
+Enter your choice (1-4): 1
 Enter your guess (10 attempts remaining): 0 1 2 3
 Your guess: 0 1 2 3
 Result: 3 correct numbers, and 0 correct location
@@ -116,38 +125,36 @@ Main.java
             └── RandomNumberApiClient(HttpClient)
 ```
 
-
 **Key Design Patterns:**
 * **Strategy Pattern** - `NumberGenerator` interface for swappable generation strategies
-* **Factory Pattern** - `GameFactory` for controlled game creation
-* **Value Objects** - `NumCombination`, `History` for type-safe, validated data
+* **Factory Pattern** - `GameFactory` for controlled game creation with difficulty support
+* **Value Objects** - `NumCombination`, `History`, `Difficulty` for type-safe, validated data
 * **State Machine** - `Game` with `Status` enum for game flow management
+* **Enum-based Configuration** - `Difficulty` and `MenuChoice` enums for type safety
 
-## Extensions & Features
+## UML Diagram
 
-### Beyond Basic Requirements
+![Mastermind UML Diagram](mastermind-uml.png)
 
-**Enhanced User Experience**
-- Comprehensive input validation with helpful error messages
-- Menu-driven interface supporting multiple game sessions
-- History tracking with guess-feedback pairs
+**Interactive UML Diagram:** [View on Lucidchart](https://lucid.app/lucidchart/a40e0c64-6a5f-4d20-90f3-e96d7f64f470/edit?viewport_loc=3500%2C-2084%2C3549%2C1848%2CHWEp-vi-RSFO&invitationId=inv_e41122a2-634c-495f-aa46-f724465e41af)
 
-**Improved Reliability**
-- HTTP client with timeouts and status code handling
-- Retry logic with exponential backoff for API resilience
-- Local fallback ensures game always playable offline
-- Comprehensive error handling for all failure scenarios
+The diagram illustrates the complete architecture including the new difficulty system, hint functionality, and all domain models with their relationships.
 
-**Professional Development Practices**
-- GitHub Actions CI/CD pipeline for automated testing
-- 95+ unit tests with comprehensive edge case coverage
-- Clean dependency injection enabling easy testing and mocking
+## Key Features
 
-### Potential Future Extensions
-- Difficulty levels (different ranges, combination lengths)
-- Multiplayer support with turn-based gameplay
-- Game statistics and scoring system
-- Timed gameplay modes
+**Development Timeline:**
+1. **Base Requirements Complete** ([PR #10](https://github.com/joe-bor/mastermind/pull/10)) - Fully playable Mastermind game
+2. **Enhanced Features:**
+   - **Hint System** ([PR #14](https://github.com/joe-bor/mastermind/pull/14)) - Smart hint functionality with usage tracking
+   - **Difficulty Levels** ([PR #15](https://github.com/joe-bor/mastermind/pull/15)) - Easy (3 digits, 0-5), Normal (4 digits, 0-7), Hard (5 digits, 0-9)
+   - **Enhanced UI** ([PR #13](https://github.com/joe-bor/mastermind/pull/13)) - Personalized interface with improved navigation
+   - **CI/CD Pipeline** ([PR #11](https://github.com/joe-bor/mastermind/pull/11)) - Automated testing workflow
+
+**Technical Features**
+- **Resilient API Integration** - Random.org API with retry logic and local fallback
+- **Type-Safe Architecture** - Strong typing with custom enums and value objects
+- **Comprehensive Testing** - Unit tests with GitHub Actions CI/CD
+- **Clean Architecture** - SOLID principles with dependency injection throughout
 
 ## Testing & CI
 
@@ -166,7 +173,7 @@ Main.java
 
 ---
 
-## Critical Design Decisions
+## Design Choices
 
 **NumCombination as Central Domain Model**
 - Chose strong typing over primitive collections for type safety and validation
@@ -187,12 +194,22 @@ Main.java
 **Strategy Pattern for Number Generation**
 - `NumberGenerator` interface allows swapping between API-based and local number generation
 - Enables clean dependency injection and comprehensive testing
-- Supports future extensions (different difficulty levels, number ranges)
+- Fully supports configurable difficulty levels with different number ranges
 
-**Factory Pattern for Game Creation**
-- `GameFactory` encapsulates game creation complexity
-- Single responsibility: handles number generation coordination
+**Factory Pattern with Difficulty Integration**
+- `GameFactory` encapsulates game creation complexity with difficulty-aware instantiation
+- Single responsibility: handles number generation coordination based on chosen difficulty
 - Enables controlled instantiation with proper dependency injection
+
+**Hint System Architecture**
+- `Game.getHint()` method provides strategic hint delivery without compromising game integrity
+- Uses `Optional<String>` for clean null-safe hint handling
+- Integrates seamlessly with existing game state and menu system
+
+**Difficulty System Design**
+- `Difficulty` enum encapsulates combination size and number range per difficulty level
+- Type-safe difficulty selection with `fromValue()` method for menu integration
+- Immutable configuration prevents runtime modification of game parameters
 
 ---
 
